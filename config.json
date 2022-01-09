@@ -1,0 +1,33 @@
+{
+    "auth": {
+        "mongo_username": "",
+        "mongo_auth_source": "",
+        "mongo_pass": "",
+        "mongo_url": "",
+        "mongo_db_name": "",
+        "ftp_host": "",
+        "ftp_username": "",
+        "ftp_pass": "",
+        "osu_api_key": "",
+        "beatconnect_api_key": ""
+    },
+    "general": {
+        "api_port": 3002,
+        "websocket_port": 9500,
+        "clients_websocket_port": 8500,
+        "videos_path": "",
+        "external_map_download_link": "",
+        "external_replay_download_link": "",
+        "ftp_map_upload_path": "",
+        "ftp_replay_upload_path": "",
+        "set_online_client_timeout": 2000,
+        "minimum_client_version": 14,
+        "videos_filename_schema": "[${beatmapDifficultyRating} ⭐] ${replayUsername} | ${artist} - ${title} [${difficulty}] ${titleModPrefix}${mods} ${accuracy}%-${randomString}",
+        "title_mod_prefix": "+"
+    },
+    "other": {
+        "min_stars_for_motion_blur": 5,
+        "max_song_length": 900,
+        "reject_auto_mod": true
+    }
+}
