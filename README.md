@@ -95,7 +95,7 @@ If all you need is the output video in a folder on the server, then you don't ne
 -   `external_replay_download_link`: the base link that will be used for the clients to download the replays
 -   `ftp_map_upload_path`: the path on the FTP where the maps will be saved
 -   `ftp_replay_upload_path`: the path on the FTP where the replays will be saved
--   `set_online_client_timeout`: the timeout before the a connecting client is set online and ready to receive jobs
+-   `set_online_client_timeout`: the timeout before a connecting client is set online and ready to receive jobs
 -   `minimum_client_version`: the minimum client version required
 -   `videos_filename_schema`: the pattern / schema for the output video filename. Written in javascript template string. Available variables: `beatmapDifficultyRating`, `replayUsername`, `artist`, `title`, `difficulty`, `titleModPrefix`, `replayMods`, `accuracy`, `randomString` (4 characters)
     `title_mod_prefix`: the prefix in the title when the replay has mods, is automatically empty if the replay doesn't have mods
