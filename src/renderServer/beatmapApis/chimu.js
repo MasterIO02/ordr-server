@@ -7,7 +7,7 @@ module.exports = async beatmapsetId => {
             apiResponse: chimuApiResponse,
             downloadUrl: `https://api.chimu.moe/v1/download/${beatmapsetId}?n=1`,
             filename: beatmapsetId,
-            lastBeatmapUpdate: chimuApiResponse.data.LastUpdate
+            lastBeatmapUpdate: chimuApiResponse.LastUpdate
         }
     } catch (err) {
         console.log("[renderServer] Got some problems with the chimu.moe API: " + err)
