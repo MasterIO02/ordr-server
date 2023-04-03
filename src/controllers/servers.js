@@ -3,7 +3,7 @@ const { getFromCache, cache } = require("../utils/cache")
 
 exports.createServer = (req, res, next) => {
     const server = new Server({
-        id: req.body.id.id,
+        id: req.body.id,
         enabled: false,
         lastSeen: Date(),
         rendering: "nothing",
