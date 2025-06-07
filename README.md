@@ -22,7 +22,7 @@ Compared to the official instance, this open-source version intentionally lacks:
 We are not looking to add those features or any other to this open-source version of the o!rdr server for now.
 
 For every render, the server makes 2 requests to the osu! API for the initial parsing of the replay and fetch map information, and 1 request when trying to distribute a render to a connected client to one of the beatmap mirror API, + download the map if necessary.
-The bundled beatmap mirrors API are [beatconnect](https://beatconnect.io/), [kitsu.moe](https://kitsu.moe/), and [chimu.moe](https://chimu.moe/en/beatmaps).
+The bundled beatmap mirrors API are [beatconnect](https://beatconnect.io/), [Mino](https://catboy.best/).
 
 The o!rdr server exposes an easy-to-use API and a websocket to track render progress in real time.
 

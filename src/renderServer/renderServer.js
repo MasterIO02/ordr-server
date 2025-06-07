@@ -2,10 +2,10 @@ const config = require("../../config.json")
 
 // Dependencies import
 const io = require("socket.io")(config.general.clients_websocket_port)
-const wget = require("wget-improved")
 const fs = require("fs")
 const Client = require("ssh2-sftp-client")
 let sftp = new Client()
+const { default: axios } = require("axios")
 
 // DB Models import
 const Render = require("../models/render")
@@ -229,8 +229,11 @@ exports.renderServer = () => {
         }
 
         async function callApis(next, callSource) {
-            if (apiPointer === maxApis - 1) {
-                if (callSource === "start") {
+            if (next) {
+                apiPointer = apiPointer + 1
+
+                // do we have any more beatmap apis left to try?
+                if (apiPointer === maxApis - 1) {
                     await markFailedRender(
                         "All APIs are unavailable!",
                         "All beatmap mirrors are unavailable, try again later.",
@@ -238,19 +241,18 @@ exports.renderServer = () => {
                         renderToSend,
                         true
                     )
+                    return "all done"
                 }
-                return "all done"
-            }
-            if (next) {
-                apiPointer = apiPointer + 1
             } else {
                 apiPointer = 0
             }
+
             let currentApi = require(`./beatmapApis/${settings.apisToUse[apiPointer]}`)
             console.log(`[renderServer] Trying mirror index ${apiPointer}`)
             let currentApiResponse = await currentApi(renderToSend.mapID)
 
             if (currentApiResponse === "connect error") {
+                console.debug("connect error!!!")
                 await callApis(true, callSource)
             } else {
                 mapLink = currentApiResponse.downloadUrl
@@ -288,33 +290,51 @@ exports.renderServer = () => {
 
             async function downloadMap() {
                 const beatmapOutput = `${process.cwd()}/src/renderServer/beatmaps/${mapFilename}.osz`
-                let download = wget.download(mapLink, beatmapOutput)
-                download.on("start", fileSize => {
-                    console.log(`[renderServer] Downloading map at ${mapLink}: ${fileSize} bytes to download...`)
-                })
-                download.on("end", async () => {
-                    console.log(`[renderServer] Finished downloading ${mapFilename}`)
-                    let remote = `${config.general.ftp_map_upload_path}${mapFilename}.osz`
-                    await sftp.put(beatmapOutput, remote)
-                    // remove the map after having uploaded it via ftp
-                    fs.rmSync(beatmapOutput)
-                    writeBeatmapUpdate()
-                })
-                download.on("error", async _ => {
-                    let response = await callApis(true)
-                    if (response !== "all done") {
-                        downloadMap()
-                    } else {
-                        markFailedRender(
-                            "Beatmap from the mirrors not found. Skipping this render and marking it as failed.",
-                            "Beatmap not found on the mirrors. Retry later.",
-                            15,
-                            renderToSend,
-                            true
-                        )
-                        return
-                    }
-                })
+
+                console.log(`[renderServer] Downloading beatmapset ${renderToSend.mapID} at ${mapLink} for render #${renderToSend.renderID}`)
+
+                let response
+                try {
+                    response = await axios.get(mapLink, {
+                        responseType: "arraybuffer"
+                    })
+                } catch (e) {
+                    onFailedDownload(e)
+                    return
+                }
+                if (!response || !response.data) {
+                    onFailedDownload("data for the response is undefined")
+                    return
+                }
+                const fileData = Buffer.from(response.data, "binary")
+                fs.writeFileSync(beatmapOutput, fileData)
+                let remote = `${config.general.ftp_map_upload_path}${mapFilename}.osz`
+                await sftp.put(beatmapOutput, remote)
+                // remove the map after having uploaded it via ftp
+                fs.rmSync(beatmapOutput)
+                console.log(
+                    `[renderServer] Finished downloading beatmapset ${renderToSend.mapID} for render #${renderToSend.renderID}, size is ${
+                        response.headers["content-length"] ? response.headers["content-length"] + " bytes" : "unknown"
+                    }`
+                )
+                writeBeatmapUpdate()
+            }
+
+            async function onFailedDownload(error) {
+                console.log(`[renderServer] Error while downloading beatmap ${renderToSend.mapID}`, error)
+                let newResponse = await callApis(true)
+                if (newResponse !== "all done") {
+                    downloadMap()
+                } else {
+                    markFailedRender(
+                        `Beatmap from the mirrors not found for render #${renderToSend.renderID}, skipping render and marking it as failed (${error})`,
+                        "Beatmap not found on the mirrors. Retry later.",
+                        15,
+                        renderToSend,
+                        true
+                    )
+                    return
+                }
             }
 
             async function writeBeatmapUpdate() {
