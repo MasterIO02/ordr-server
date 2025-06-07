@@ -17,12 +17,7 @@ let mongoUrl = `mongodb://${config.auth.mongo_username}:${config.auth.mongo_pass
 app.set("trust proxy", true)
 
 mongoose
-    .connect(mongoUrl, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false
-    })
+    .connect(mongoUrl)
     .then(() => {
         console.log("[BOOT] Connected to database.")
     })
