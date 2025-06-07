@@ -58,15 +58,18 @@ exports.renderServer = () => {
      */
 
     io.on("connection", socket => {
-        socket.on("id", async (id, version, usingOsuApi, motionBlurCapable, uhdCapable, isRendering) => {
+        socket.on("id", async clientState => {
             if (
-                !id ||
-                !version ||
-                typeof usingOsuApi === "undefined" ||
-                typeof motionBlurCapable === "undefined" ||
-                typeof uhdCapable === "undefined"
+                !clientState.id ||
+                !clientState.version ||
+                typeof clientState.usingOsuApi === "undefined" ||
+                typeof clientState.motionBlurCapable === "undefined" ||
+                typeof clientState.uhdCapable === "undefined" ||
+                typeof clientState.isRendering === "undefined"
             )
                 return
+
+            let { id, version, usingOsuApi, motionBlurCapable, uhdCapable, isRendering } = clientState
 
             const connectedServer = await Server.findOne({
                 id: id
